@@ -1,6 +1,7 @@
-import { getSupabaseAdminClient } from '@/supabase-utils/adminClient';
 import nodemailer from 'nodemailer';
 import { NextResponse } from 'next/server';
+
+import { getSupabaseAdminClient } from '@/supabase-utils/admin-client';
 
 export async function POST(request) {
   const formData = await request.formData();

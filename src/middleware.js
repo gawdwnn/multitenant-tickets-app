@@ -1,5 +1,5 @@
-import { NextResponse } from "next/server";
-import { getSupabaseReqResClient } from "./supabase-utils/req-res-client";
+import { NextResponse } from 'next/server';
+import { getSupabaseReqResClient } from './supabase-utils/req-res-client';
 
 export async function middleware(req) {
   const { supabase, response } = getSupabaseReqResClient({ request: req });
@@ -8,15 +8,22 @@ export async function middleware(req) {
   const requestedPath = req.nextUrl.pathname;
   const sessionUser = session.data?.session?.user;
 
-  console.log("requestedPath", requestedPath);
+  console.log('requestedPath', requestedPath);
 
-  if (requestedPath.startsWith("/tickets")) {
+  const [tenant, ...restOfPath] = requestedPath.substr(1).split('/');
+  const applicationPath = '/' + restOfPath.join('/');
+
+  if (!/[a-z0-9-_]+/.test(tenant)) {
+    return NextResponse.rewrite(new URL('/not-found', req.url));
+  }
+
+  if (applicationPath.startsWith('/tickets')) {
     if (!sessionUser) {
-      return NextResponse.redirect(new URL("/", req.url));
+      return NextResponse.redirect(new URL(`/${tenant}/`, req.url));
     }
-  } else if (requestedPath === "/") {
+  } else if (applicationPath === '/') {
     if (sessionUser) {
-      return NextResponse.redirect(new URL("/tickets", req.url));
+      return NextResponse.redirect(new URL(`/${tenant}/tickets`, req.url));
     }
   }
 
@@ -24,5 +31,5 @@ export async function middleware(req) {
 }
 
 export const config = {
-  matcher: ["/((?!.*\\.).*)"],
+  matcher: ['/((?!.*\\.).*)'],
 };

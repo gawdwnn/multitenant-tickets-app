@@ -3,8 +3,8 @@ const nextConfig = {
   redirects: async () => {
     return [
       {
-        source: '/logout',
-        destination: '/auth/logout',
+        source: '/:tenant/logout',
+        destination: '/:tenant/auth/logout',
         permanent: true,
       },
     ];
