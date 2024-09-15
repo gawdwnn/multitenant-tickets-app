@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 
 import { getSupabaseCookiesUtilClient } from '@/supabase-utils/cookies-util-client';
+import { buildUrl } from '@/utils/url-helpers';
 
 export async function GET(request, { params }) {
   const { searchParams } = new URL(request.url);
@@ -12,9 +13,9 @@ export async function GET(request, { params }) {
 
   let verifyType = 'magiclink';
   if (isRecovery) verifyType = 'recovery';
-  
+
   const supabase = getSupabaseCookiesUtilClient();
-  const { error } = await supabase.auth.verifyOtp({
+  const { error, data } = await supabase.auth.verifyOtp({
     type: verifyType,
     token_hash: hashed_token,
   });

@@ -1,13 +1,16 @@
-import nodemailer from 'nodemailer';
 import { NextResponse } from 'next/server';
+import nodemailer from 'nodemailer';
 
 import { getSupabaseAdminClient } from '@/supabase-utils/admin-client';
+import { buildUrl } from '@/utils/url-helpers';
 
-export async function POST(request) {
+export async function POST(request, { params }) {
   const formData = await request.formData();
   const email = formData.get('email');
   const supabaseAdmin = getSupabaseAdminClient();
   const type = formData.get('type') === 'recovery' ? 'recovery' : 'magiclink';
+
+  const tenantUrl = (path) => buildUrl(path, params.tenant, request);
 
   const { data: linkData, error } = await supabaseAdmin.auth.admin.generateLink(
     {
@@ -17,17 +20,13 @@ export async function POST(request) {
   );
 
   if (error) {
-    return NextResponse.redirect(
-      new URL(`/error?type=${type}`, request.url),
-      302
-    );
+    return NextResponse.redirect(tenantUrl(`/error?type=${type}`), 302);
   }
 
   const { hashed_token } = linkData.properties;
 
-  const constructedLink = new URL(
-    `/auth/verify?hashed_token=${hashed_token}&type=${type}`,
-    request.url
+  const constructedLink = tenantUrl(
+    `/auth/verify?hashed_token=${hashed_token}&type=${type}`
   );
 
   const transporter = nodemailer.createTransport({
@@ -39,7 +38,7 @@ export async function POST(request) {
     type === 'recovery'
       ? 'Hi there, you requested a password change!'
       : 'Hi there, this is a custom magic link email!';
-      
+
   const secondSentenceEnding = type === 'recovery' ? 'change it' : 'log in';
 
   await transporter.sendMail({
@@ -52,6 +51,7 @@ export async function POST(request) {
     `,
   });
 
-  const thanksUrl = new URL(`/magic-thanks?type=${type}`, request.url);
+  const thanksUrl = tenantUrl(`/magic-success?type=${type}`);
+
   return NextResponse.redirect(thanksUrl, 302);
 }

@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "reset": "npx supabase stop; docker volume rm $(docker volume ls --format '{{.Name}}' --filter label=com.supabase.cli.project=supabase_book); npx supabase start",
+    "reset": "npx supabase stop && volumes=$(docker volume ls -q --filter name=supabase_*_supabase-tickets-system) && [ -n \"$volumes\" ] && docker volume rm $volumes; npx supabase start",
     "dev": "next dev",
     "build": "next build",
     "start": "next start",

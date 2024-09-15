@@ -8,8 +8,6 @@ export async function middleware(req) {
   const requestedPath = req.nextUrl.pathname;
   const sessionUser = session.data?.session?.user;
 
-  console.log('requestedPath', requestedPath);
-
   const [tenant, ...restOfPath] = requestedPath.substr(1).split('/');
   const applicationPath = '/' + restOfPath.join('/');
 

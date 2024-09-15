@@ -12,7 +12,10 @@ export default async function LoginPage({ searchParams, params: { tenant } }) {
     .eq('id', tenant)
     .single();
 
-    if (error) {
+  console.log({ data });
+
+  if (error) {
+    console.log(`@error (${tenant})`, error);
     return notFound();
   }
 
